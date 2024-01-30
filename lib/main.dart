@@ -170,6 +170,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                       )
                     : ListView.builder(
+                        padding: EdgeInsets.only(bottom: 100),
                         shrinkWrap: true,
                         itemCount: todos.length,
                         itemBuilder: (context, index) {
