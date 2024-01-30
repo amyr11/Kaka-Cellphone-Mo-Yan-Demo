@@ -60,17 +60,6 @@ List<Todo> todos = [];
 class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _controller = TextEditingController();
 
-  @override
-  void initState() {
-    super.initState();
-
-    for (int i = 0; i < 3; i++) {
-      _addTodo(
-        "Todo $i",
-      );
-    }
-  }
-
   void _onCleanButtonPressed() {
     setState(() {
       todos.removeWhere((todo) => todo.isCompleted);
@@ -107,6 +96,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _onAddButtonPressed() {
+    if (_controller.text.isEmpty) {
+      return;
+    }
+
     setState(() {
       _addTodo(
         _controller.text,
@@ -133,61 +126,63 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      "My Todo's",
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                    const SizedBox(width: 20),
-                    Text(
-                      "${todos.where((todo) => todo.isCompleted).length}/${todos.length}",
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                  ],
-                ),
-                const Spacer(),
-                ElevatedButton(
-                  onPressed: () {
-                    _onCleanButtonPressed();
-                  },
-                  child: const Text("Clean"),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: todos.isEmpty
-                  ? Padding(
-                      padding: const EdgeInsets.only(bottom: 40),
-                      child: Center(
-                        child: Text(
-                          "Yey! No todo's.",
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        "My Todo's",
+                        style: Theme.of(context).textTheme.headlineMedium,
                       ),
-                    )
-                  : ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: todos.length,
-                      itemBuilder: (context, index) {
-                        return TodoItem(
-                          todo: todos[index],
-                          onStatusChanged: _onItemStatusChanged,
-                          onDeleted: _onItemDeleted,
-                        );
-                      },
-                    ),
-            ),
-          ],
+                      const SizedBox(width: 20),
+                      Text(
+                        "${todos.where((todo) => todo.isCompleted).length}/${todos.length}",
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  ElevatedButton(
+                    onPressed: () {
+                      _onCleanButtonPressed();
+                    },
+                    child: const Text("Clean"),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Expanded(
+                child: todos.isEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.only(bottom: 40),
+                        child: Center(
+                          child: Text(
+                            "Yey! No todo's.",
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                        ),
+                      )
+                    : ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: todos.length,
+                        itemBuilder: (context, index) {
+                          return TodoItem(
+                            todo: todos[index],
+                            onStatusChanged: _onItemStatusChanged,
+                            onDeleted: _onItemDeleted,
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
       bottomSheet: Padding(
@@ -196,6 +191,9 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             Expanded(
               child: TextField(
+                onSubmitted: (value) {
+                  _onAddButtonPressed();
+                },
                 controller: _controller,
                 decoration: InputDecoration(
                   hintText: "Add a new todo",
@@ -239,6 +237,7 @@ class _TodoItemState extends State<TodoItem> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      visualDensity: VisualDensity.comfortable,
       contentPadding: EdgeInsets.zero,
       title: Text(
         widget.todo.title,
@@ -255,7 +254,7 @@ class _TodoItemState extends State<TodoItem> {
         },
       ),
       trailing: IconButton(
-        icon: const Icon(Icons.delete),
+        icon: const Icon(Icons.close),
         onPressed: () {
           widget.onDeleted(widget.todo);
         },
